@@ -54,5 +54,3 @@ public class SchetsControl : UserControl
         penkleur = Color.FromName(kleurNaam);
     }
 }
-
-test
