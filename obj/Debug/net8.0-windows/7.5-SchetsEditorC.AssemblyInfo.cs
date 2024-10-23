@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("7.5-SchetsEditorC")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ffe31497b2d334ea827f257a16694f0ebc9194d0")]
 [assembly: System.Reflection.AssemblyProductAttribute("7.5-SchetsEditorC")]
 [assembly: System.Reflection.AssemblyTitleAttribute("7.5-SchetsEditorC")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

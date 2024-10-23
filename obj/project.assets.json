@@ -8,19 +8,19 @@
     "net8.0-windows7.0": []
   },
   "packageFolders": {
-    "C:\\Users\\juliu\\.nuget\\packages\\": {}
+    "C:\\Users\\leona\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\juliu\\OneDrive\\DESKTOP PC\\Desktop\\Demo\\SchetsEditorC\\7.5-SchetsEditorC.csproj",
+      "projectUniqueName": "C:\\Users\\leona\\RiderProjects\\aap\\7.5-SchetsEditorC.csproj",
       "projectName": "7.5-SchetsEditorC",
-      "projectPath": "C:\\Users\\juliu\\OneDrive\\DESKTOP PC\\Desktop\\Demo\\SchetsEditorC\\7.5-SchetsEditorC.csproj",
-      "packagesPath": "C:\\Users\\juliu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\juliu\\OneDrive\\DESKTOP PC\\Desktop\\Demo\\SchetsEditorC\\obj\\",
+      "projectPath": "C:\\Users\\leona\\RiderProjects\\aap\\7.5-SchetsEditorC.csproj",
+      "packagesPath": "C:\\Users\\leona\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\leona\\RiderProjects\\aap\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\juliu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\leona\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -69,7 +69,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
