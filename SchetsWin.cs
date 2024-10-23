@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
+using ContentAlignment = System.Drawing.ContentAlignment;
+
 
 public class SchetsWin : Form
 {   
@@ -32,6 +36,7 @@ public class SchetsWin : Form
     {
         this.Close();
     }
+
 
     public SchetsWin()
     {
@@ -84,8 +89,28 @@ public class SchetsWin : Form
         ToolStripMenuItem menu = new ToolStripMenuItem("File");
         menu.MergeAction = MergeAction.MatchOnly;
         menu.DropDownItems.Add("Sluiten", null, this.afsluiten);
+        menu.DropDownItems.Add("Open", null, this.afsluiten);
+        menu.DropDownItems.Add("Opslaan", null, this.afsluiten);
+        menu.DropDownItems.Add("Opslaan Als", null, this.afsluiten);
         menuStrip.Items.Add(menu);
     }
+    
+    private void Openen(object sender, EventArgs e)
+    {
+        ToolStripMenuItem menu = new ToolStripMenuItem("Open");
+        OpenFileDialog d = new OpenFileDialog();
+        d.Filter = "Teksten|*.txt";
+        if (d.ShowDialog() == DialogResult.OK)
+        {
+            Tekst t = new Tekst();
+            t.MdiParent = this;
+            t.lees( d.FileName );
+            t.Show();
+        }
+    }
+
+
+
 
     private void maakToolMenu(ICollection<ISchetsTool> tools)
     {   
@@ -161,5 +186,97 @@ public class SchetsWin : Form
         foreach (string k in kleuren)
             cbb.Items.Add(k);
         cbb.SelectedIndex = 0;
+    }
+}
+
+public class Tekst : Form
+{
+    private TextBox invoer;
+
+    public Tekst()
+    {
+        invoer = new TextBox();
+        this.Controls.Add(invoer);
+    }
+
+    void zoeken(object sender, EventArgs e)
+    {
+        ZoekDialoog d = new ZoekDialoog();
+        if (d.ShowDialog() == DialogResult.OK)
+        {
+            string alles = invoer.Text;
+            string zk = d.Zoek.Text;
+
+            if (!string.IsNullOrEmpty(zk)) // Controleer of de zoekterm niet leeg is
+            {
+                int pos = alles.IndexOf(zk);
+                if (pos >= 0) // Controleer of de term gevonden is
+                {
+                    invoer.Select(pos, zk.Length);
+                }
+                else
+                {
+                    MessageBox.Show("Zoekterm niet gevonden.");
+                }
+            }
+        }
+    }
+
+    public void lees(string naam)
+    {
+        StreamReader sr = new StreamReader(naam);
+        this.invoer.Text = sr.ReadToEnd();
+        sr.Close();
+        this.Text = naam;
+    }
+
+    void Schrijf(string naam)
+    {
+        StreamWriter sw = new StreamWriter(naam);
+        sw.Write(this.invoer.Text);
+        sw.Close();
+        this.Text = naam;
+    }
+}
+
+class ZoekDialoog : Form
+{
+
+    public TextBox Zoek;
+    private Button ok, cc;
+
+    public ZoekDialoog()
+    {
+        // positionering van de knoppen bovenaan het scherm
+        Zoek = new TextBox()
+        {
+            Dock = DockStyle.Top
+        };
+        ok = new Button()
+        {
+            Text = "OK",
+            Dock = DockStyle.Right
+        };
+
+        cc = new Button()
+        {
+            Text = "Annuleer",
+            Dock = DockStyle.Right
+        };
+        
+        ok.Click += this.positief;
+        this.CancelButton = cc;
+        this.AcceptButton = ok;
+        
+        this.Controls.Add(Zoek);
+        this.Controls.Add(ok);
+        this.Controls.Add(cc);
+        this.AcceptButton = ok;
+    }
+
+    void positief(object sender, EventArgs e)
+    {
+        this.DialogResult = DialogResult.OK;
+        this.Close();
     }
 }
