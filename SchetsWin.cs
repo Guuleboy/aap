@@ -224,7 +224,7 @@ public class Tekst : Form
         }
     }
 
-    public void lees(string naam)
+    public void lees(string naam) //lezen van string
     {
         StreamReader sr = new StreamReader(naam);
         this.invoer.Text = sr.ReadToEnd();
