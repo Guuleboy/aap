@@ -1,0 +1,9 @@
+﻿TODO: Cirkels - Gedaan
+TODO: Exporteren
+TODO: Nieuwe gum
+TODO: Opslaan en terug lezen - Leo
+
+
+23-10-2024:
+Cirkels zijn toegevoegd op basis van het bestaande vierkant systeem. Wij hebben ervoor gekozen om in paint voor nu hele
+simpele tekeningen te maken voor de buttons. Hierna zullen nog betere tekeningen volgen.

@@ -33,6 +33,16 @@ public class SchetsWin : Form
         this.Close();
     }
 
+    private void opslaan(object obj, EventArgs ea)
+    {
+        MessageBox.Show("Schets versie 2.0\n(c) UU Informatica 2024"
+            , "Over \"Schets\""
+            , MessageBoxButtons.OK
+            , MessageBoxIcon.Information
+        );
+        
+    }
+
     public SchetsWin()
     {
         ISchetsTool[] deTools = { new PenTool()         
@@ -86,6 +96,7 @@ public class SchetsWin : Form
         ToolStripMenuItem menu = new ToolStripMenuItem("File");
         menu.MergeAction = MergeAction.MatchOnly;
         menu.DropDownItems.Add("Sluiten", null, this.afsluiten);
+        menu.DropDownItems.Add("Aap", null, this.opslaan);
         menuStrip.Items.Add(menu);
     }
 
