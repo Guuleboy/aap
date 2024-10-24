@@ -1,0 +1,15 @@
+C:\Users\leona\RiderProjects\aap\bin\Debug\net8.0-windows\7.5-SchetsEditorC.exe
+C:\Users\leona\RiderProjects\aap\bin\Debug\net8.0-windows\7.5-SchetsEditorC.deps.json
+C:\Users\leona\RiderProjects\aap\bin\Debug\net8.0-windows\7.5-SchetsEditorC.runtimeconfig.json
+C:\Users\leona\RiderProjects\aap\bin\Debug\net8.0-windows\7.5-SchetsEditorC.dll
+C:\Users\leona\RiderProjects\aap\bin\Debug\net8.0-windows\7.5-SchetsEditorC.pdb
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.AssemblyInfoInputs.cache
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.AssemblyInfo.cs
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.csproj.CoreCompileInputs.cache
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.sourcelink.json
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.dll
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\refint\7.5-SchetsEditorC.dll
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.pdb
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\7.5-SchetsEditorC.genruntimeconfig.cache
+C:\Users\leona\RiderProjects\aap\obj\Debug\net8.0-windows\ref\7.5-SchetsEditorC.dll
