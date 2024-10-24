@@ -8,7 +8,7 @@ public class SchetsEditor : Form
 
     public SchetsEditor()
     {   
-        Console.WriteLine("");
+        Console.WriteLine("Test");
         this.ClientSize = new Size(800, 600);
         menuStrip = new MenuStrip();
         this.Controls.Add(menuStrip);
