@@ -13,7 +13,8 @@ public class SchetsWin : Form
     SchetsControl schetscontrol;
     ISchetsTool huidigeTool;
     Panel paneel;
-    bool vast;
+    bool vast, veranderd;
+    private OpenFileDialog open;
 
     private void veranderAfmeting(object o, EventArgs ea)
     {
@@ -92,8 +93,8 @@ public class SchetsWin : Form
         menu.MergeAction = MergeAction.MatchOnly;
         menu.DropDownItems.Add("Sluiten", null, this.afsluiten);
         menu.DropDownItems.Add("Open", null, this.afsluiten);
+        menu.DropDownItems.Add("Opslaan als", null, this.Save);
         menu.DropDownItems.Add("Opslaan", null, this.afsluiten);
-        menu.DropDownItems.Add("Opslaan Als", null, this.afsluiten);
         menuStrip.Items.Add(menu);
     }
     
@@ -189,6 +190,23 @@ public class SchetsWin : Form
             cbb.Items.Add(k);
         cbb.SelectedIndex = 0;
     }
+
+    private void Save(object obj, EventArgs ea)
+    {
+        SaveFileDialog opslagKiezer = new SaveFileDialog();
+
+        opslagKiezer.Filter = "JPG-file|*.jpg|PNG-file|*.png|BMP-file|*.bmp";
+        opslagKiezer.Title = "Save Schets";
+        
+        DialogResult resultaat = opslagKiezer.ShowDialog();
+        if (resultaat == DialogResult.OK)
+        {
+            string bestandsnaam = opslagKiezer.FileName;
+            this.schetscontrol.Schets.NaarSchetsBestand(bestandsnaam);
+            veranderd = false;
+        }
+    }
+    
 }
 
 public class Tekst : Form

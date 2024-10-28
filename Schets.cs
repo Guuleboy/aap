@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 
 public class Schets
 {
     private Bitmap bitmap;
+    public List<PuntVorm> Vormen;
+    public static List<PuntVorm> RedoStack = new List<PuntVorm>();
         
     public Schets()
     {
@@ -39,5 +42,15 @@ public class Schets
     public void Roteer()
     {
         bitmap.RotateFlip(RotateFlipType.Rotate90FlipNone);
+    }
+
+    public void NaarSchetsBestand(string bestandsnaam)
+    {
+        StreamWriter bestand = new StreamWriter(bestandsnaam);
+        foreach (PuntVorm vorm in Vormen)
+        {
+            bestand.WriteLine(vorm.ToString());
+        }
+        bestand.Close();
     }
 }

@@ -154,3 +154,15 @@ public class GumTool : PenTool
     {   g.DrawLine(MaakPen(Brushes.White, 7), p1, p2);
     }
 }
+
+public abstract class PuntVorm
+{
+    public SolidBrush Kwast;
+    public Point Startpunt;
+    public int VerzamelingNummer;
+    public Pen TekenPen;
+    public int Dikte;
+
+    public abstract void Teken(Graphics gr);
+    public abstract bool Geklikt(Point klik);
+}
