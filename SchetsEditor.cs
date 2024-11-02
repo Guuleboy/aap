@@ -1,26 +1,58 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Text;
 using System.Windows.Forms;
+
+namespace SchetsEditorC;
 
 public class SchetsEditor : Form
 {
     private MenuStrip menuStrip;
+    private ToolStripDropDownItem _sketchMenu;
+
+    private int schetsIndex;
+    private List<SchetsWin> _sketchWindows;
+    
+    public List<SchetsWin> Sketches {get => _sketchWindows;}
+    
+    private SchetsWin _sketch;
+    public SchetsWin Sketch {get => _sketch; set => _sketch = value; }
 
     public SchetsEditor()
     {   
+        _sketchWindows = new List<SchetsWin>();
+        
         this.ClientSize = new Size(800, 600);
         menuStrip = new MenuStrip();
         this.Controls.Add(menuStrip);
         this.maakFileMenu();
         this.maakHelpMenu();
+        this.MaakSchets();
         this.Text = "Schets editor";
         this.IsMdiContainer = true;
         this.MainMenuStrip = menuStrip;
     }
+
+    public void VerwijderSchets(SchetsWin window)
+    {
+        _sketchMenu.DropDownItems.Remove(window.It);
+        _sketchWindows.Remove(window);
+    }
+
+    private void MaakSchets()
+    {
+        _sketchMenu = new ToolStripMenuItem("Schetsen");
+        menuStrip.Items.Add(_sketchMenu);
+    }
+    
+    
     private void maakFileMenu()
     {   
         ToolStripDropDownItem menu = new ToolStripMenuItem("File");
-        menu.DropDownItems.Add("Nieuw", null, this.nieuw);
+        menu.DropDownItems.Add("Nieuw", null, this.NieuweSchetsManager);
+        menu.DropDownItems.Add("Open", null, Open);
         menu.DropDownItems.Add("Exit", null, this.afsluiten);
         menuStrip.Items.Add(menu);
     }
@@ -38,13 +70,113 @@ public class SchetsEditor : Form
                         , MessageBoxIcon.Information
                         );
     }
-
-    private void nieuw(object sender, EventArgs e)
-    {   
-        SchetsWin s = new SchetsWin();
-        s.MdiParent = this;
-        s.Show();
+    
+    public void HideAll()
+    {
+        foreach (SchetsWin window in _sketchWindows)
+        {
+            window.Hide();
+        }
     }
+
+    private void NieuweSchetsManager(object o, EventArgs ea) => nieuw(null);
+
+    private void OpenFileFromImage(string path) => nieuw(Image.FromFile(path));
+
+    private void OpenSchets(string path)
+    {
+        FileStream fs;
+        try
+        {
+            fs = File.OpenRead(path);
+        }
+        catch (Exception e)
+        {
+            ErrorDialog("Error", e.Message);
+            return;
+        }
+        BinaryReader br = new(fs);
+        byte[] magic = br.ReadBytes(7);
+        if (Encoding.ASCII.GetString(magic) != "Sketch+")
+        {
+            ErrorDialog("Error", "Bestand is geen schets bestand");
+            return;
+        }
+        string name = br.ReadString();
+
+        HideAll();
+        SchetsWin s = new(this, br)
+        {
+            Name = name,
+            MdiParent = this
+        };
+        s.Show();
+        s.Location = new Point(0, 0);
+        _sketchWindows.Add(s);
+        _sketch = s;
+        s.It = _sketchMenu.DropDownItems.Add(s.Name, null, s.SelectSketch);
+        schetsIndex++;
+    }
+    
+    public static void ErrorDialog(string title, string caption) => MessageBox.Show (caption, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+    
+    private void nieuw(Image img)
+    {
+        string name = PromptDialog("Nieuwe Schets", "Schets naam: ");
+        
+        HideAll();
+        SchetsWin s = new(this, img)
+        {
+            Name = name == "" ? $"Schets {schetsIndex++}" : name, 
+            MdiParent = this
+        };
+        s.Show();
+        s.Location = new Point(0, 0);
+        _sketchWindows.Add(s);
+        _sketch = s;
+        s.It = _sketchMenu.DropDownItems.Add(s.Name, null, s.SelectSketch);
+        schetsIndex++;
+    }
+
+    private void Open(object sender, EventArgs e)
+    {
+        if (new OpenFileDialog { Title = "Bestand openen..." } is var dia && dia.ShowDialog() == DialogResult.OK)
+        {
+            Text = dia.FileName;
+            if (Path.HasExtension(Text) && Path.GetExtension(Text) == ".schets")
+            {
+                OpenSchets(Text);
+                return;
+            }
+            OpenFileFromImage(Text);
+        }
+    }
+    
+    public static string PromptDialog(string text, string caption)
+    {
+        Form prompt = new()
+        {
+            Width = 300,
+            Height = 130,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            Text = caption,
+            StartPosition = FormStartPosition.CenterParent
+        };
+        
+        Label textLabel = new () { Left = 50, Top = 10, Text = text };
+        TextBox textBox = new () { Left = 50, Top = 30, Text = text };
+        Button confirmation = new () { Text = "Ok", Left = 110, Width = 80, Top = 60,  DialogResult = DialogResult.OK };
+        
+        confirmation.Click += (sender, e) => { prompt.Close(); };
+        prompt.Controls.Add(textBox);
+        prompt.Controls.Add(textLabel);
+        prompt.Controls.Add(confirmation);
+        prompt.AcceptButton = confirmation;
+
+        return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : "";
+    }
+    
+    
     private void afsluiten(object sender, EventArgs e)
     {   
         this.Close();

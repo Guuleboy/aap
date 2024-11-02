@@ -1,48 +1,53 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 
-public interface ISchetsTool
+namespace SchetsEditorC;
+
+public abstract class SchetsTool
 {
-    void MuisVast(SchetsControl s, Point p);
-    void MuisDrag(SchetsControl s, Point p);
-    void MuisLos(SchetsControl s, Point p);
-    void Letter(SchetsControl s, char c);
+    public abstract Element.ElementTypes ElementType { get; }
+    public virtual string IconName { get => Element.IcoonNaam(ElementType); }
+    public override string ToString() => Element.TypeNaam(ElementType);
+    
+    public abstract void MuisVast(SchetsControl s, Point p);
+    public abstract void MuisDrag(SchetsControl s, Point p);
+    public abstract void  MuisLos(SchetsControl s, Point p);
+    public abstract void  Letter(SchetsControl s, char c);
 }
 
-public abstract class StartpuntTool : ISchetsTool
+public abstract class StartpuntTool : SchetsTool
 {
     protected Point startpunt;
     protected Brush kwast;
+    protected SolidBrush gevuld;
 
-    public virtual void MuisVast(SchetsControl s, Point p)
+    public override void MuisVast(SchetsControl s, Point p)
     {   startpunt = p;
     }
-    public virtual void MuisLos(SchetsControl s, Point p)
+    public override void MuisLos(SchetsControl s, Point p)
     {   kwast = new SolidBrush(s.PenKleur);
+        gevuld = new SolidBrush(s.VulKleur);
     }
-    public abstract void MuisDrag(SchetsControl s, Point p);
-    public abstract void Letter(SchetsControl s, char c);
+    
 }
 
 public class TekstTool : StartpuntTool
 {
-    public override string ToString() { return "tekst"; }
-
+    public override Element.ElementTypes ElementType => Element.ElementTypes.Text;
+    
     public override void MuisDrag(SchetsControl s, Point p) { }
 
     public override void Letter(SchetsControl s, char c)
     {
         if (c >= 32)
         {
-            Graphics gr = s.MaakBitmapGraphics();
+            Graphics gr = s.Graphics;
             Font font = new Font("Tahoma", 40);
             string tekst = c.ToString();
-            SizeF sz = 
-            gr.MeasureString(tekst, font, this.startpunt, StringFormat.GenericTypographic);
-            gr.DrawString   (tekst, font, kwast, 
-                                            this.startpunt, StringFormat.GenericTypographic);
-            // gr.DrawRectangle(Pens.Black, startpunt.X, startpunt.Y, sz.Width, sz.Height);
+            SizeF sz = gr.MeasureString(tekst, font, this.startpunt, StringFormat.GenericTypographic);
+            gr.DrawString   (tekst, font, kwast, this.startpunt, StringFormat.GenericTypographic);
             startpunt.X += (int)sz.Width;
             s.Invalidate();
         }
@@ -62,17 +67,31 @@ public abstract class TweepuntTool : StartpuntTool
         pen.EndCap = LineCap.Round;
         return pen;
     }
+    
     public override void MuisVast(SchetsControl s, Point p)
     {   base.MuisVast(s, p);
         kwast = Brushes.Gray;
+        if (gevuld == null)
+            gevuld = Brushes.Transparent as SolidBrush;
+        if (gevuld.Color != Color.Transparent)
+        {
+            gevuld = Brushes.Gray as SolidBrush;
+        }
+        else if (gevuld.Color == Color.Transparent)
+        {
+            gevuld = Brushes.Transparent as SolidBrush;
+        }
     }
     public override void MuisDrag(SchetsControl s, Point p)
     {   s.Refresh();
-        this.Bezig(s.CreateGraphics(), this.startpunt, p);
+        s.Sketch.Update();
+        this.Bezig(s.Graphics, this.startpunt, p);
     }
+    
     public override void MuisLos(SchetsControl s, Point p)
     {   base.MuisLos(s, p);
-        this.Compleet(s.MaakBitmapGraphics(), this.startpunt, p);
+        this.Compleet(s.Graphics, this.startpunt, p);
+        s.Sketch.Update();
         s.Invalidate();
     }
     public override void Letter(SchetsControl s, char c)
@@ -81,64 +100,92 @@ public abstract class TweepuntTool : StartpuntTool
     public abstract void Bezig(Graphics g, Point p1, Point p2);
         
     public virtual void Compleet(Graphics g, Point p1, Point p2)
-    {   this.Bezig(g, p1, p2);
+    {   
+        Bezig(g,p1,p2);
     }
 }
 
 public class RechthoekTool : TweepuntTool
 {
-    public override string ToString() { return "kader"; }
+    protected VierkantElement _element;
+    public override Element.ElementTypes ElementType => Element.ElementTypes.Vierkant;
 
-    public override void Bezig(Graphics g, Point p1, Point p2)
-    {   g.DrawRectangle(MaakPen(kwast,3), TweepuntTool.Punten2Rechthoek(p1, p2));
+    public override void MuisVast(SchetsControl s, Point p)
+    {
+        base.MuisVast(s, p);
+        _element = new(Rectangle.Empty, MaakPen(kwast, 3), gevuld);
+        s.Sketch.VoegToe(_element);
+        s.Sketch.UndoAdd(_element);
     }
-}
     
-public class VolRechthoekTool : RechthoekTool
-{
-    public override string ToString() { return "vlak"; }
+    public override void Bezig(Graphics g, Point p1, Point p2)
+    {
+        _element.Bounds = Punten2Rechthoek(p1, p2);
+    }
 
     public override void Compleet(Graphics g, Point p1, Point p2)
-    {   g.FillRectangle(kwast, TweepuntTool.Punten2Rechthoek(p1, p2));
+    {
+        _element.Bounds = Punten2Rechthoek(p1, p2);
+        _element.Pen = MaakPen(kwast, 3);
+        _element.Vulling = gevuld;
     }
 }
 
 public class CirkelTool : TweepuntTool 
 {
-    public override string ToString() { return "cirkel"; }
+    protected CirkelElement _element;
+    public override Element.ElementTypes ElementType => Element.ElementTypes.Cirkel;
 
+    public override void MuisVast(SchetsControl s, Point p)
+    {
+        base.MuisVast(s, p);
+        _element = new(Rectangle.Empty, MaakPen(kwast, 3), gevuld);
+        s.Sketch.VoegToe(_element);
+        s.Sketch.UndoAdd(_element);
+    }
+    
     public override void Bezig(Graphics g, Point p1, Point p2)
     {
-        g.DrawEllipse(MaakPen(kwast,3),TweepuntTool.Punten2Rechthoek(p1, p2));
+        _element.Bounds = Punten2Rechthoek(p1, p2);
+    }
+
+    public override void Compleet(Graphics g, Point p1, Point p2)
+    {
+        _element.Bounds = Punten2Rechthoek(p1, p2);
+        _element.Pen = MaakPen(kwast, 3);
+        _element.Vulling = gevuld;
     }
 }
-
-public class VolCirkelTool : TweepuntTool
-{
-    public override string ToString()
-    {
-        return "cirkelvlak";
-    }
-
-    public override void Bezig(Graphics g, Point p1, Point p2)
-    {
-        g.FillEllipse(kwast, TweepuntTool.Punten2Rechthoek(p1, p2));
-    }
-}
-
 
 public class LijnTool : TweepuntTool
 {
-    public override string ToString() { return "lijn"; }
+    private LijnElement _element;
+    
+    public override Element.ElementTypes ElementType => Element.ElementTypes.Lijn;
 
+    public override void MuisVast(SchetsControl s, Point p)
+    {
+        base.MuisVast(s, p);
+        _element = new(p,p,MaakPen(kwast, 3));
+        s.Sketch.VoegToe(_element);
+        s.Sketch.UndoAdd(_element);
+    }
+    
     public override void Bezig(Graphics g, Point p1, Point p2)
-    {   g.DrawLine(MaakPen(this.kwast,3), p1, p2);
+    {
+        _element.Pt2 = p2;
+    }
+
+    public override void Compleet(Graphics g, Point p1, Point p2)
+    {
+        _element.Pt2 = p2;
+        _element.Pen = MaakPen(kwast, 3);
     }
 }
 
 public class PenTool : LijnTool
 {
-    public override string ToString() { return "pen"; }
+    public override Element.ElementTypes ElementType => Element.ElementTypes.Pen;
 
     public override void MuisDrag(SchetsControl s, Point p)
     {   this.MuisLos(s, p);
@@ -146,23 +193,21 @@ public class PenTool : LijnTool
     }
 }
     
-public class GumTool : PenTool
+public class GumTool : SchetsTool
 {
-    public override string ToString() { return "gum"; }
-
-    public override void Bezig(Graphics g, Point p1, Point p2)
-    {   g.DrawLine(MaakPen(Brushes.White, 7), p1, p2);
+    public override Element.ElementTypes ElementType => Element.ElementTypes.Gum;
+    
+    public override void MuisVast(SchetsControl s, Point p)
+    {
+        Element el = s.Sketch.Elements.LastOrDefault(e => e.Contains(p));
+        if (el == null) return;
+        
+        s.Sketch.RedoAdd(el);
+        s.Sketch.HaalWeg(el);
+        s.Invalidate();
     }
-}
 
-public abstract class PuntVorm
-{
-    public SolidBrush Kwast;
-    public Point Startpunt;
-    public int VerzamelingNummer;
-    public Pen TekenPen;
-    public int Dikte;
-
-    public abstract void Teken(Graphics gr);
-    public abstract bool Geklikt(Point klik);
+    public override void MuisLos(SchetsControl s, Point p) { }
+    public override void MuisDrag(SchetsControl s, Point p) { }
+    public override void Letter(SchetsControl s, char c) { }
 }

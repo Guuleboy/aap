@@ -1,22 +1,95 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Text;
+
+namespace SchetsEditorC;
 
 public class Schets
 {
     private Bitmap bitmap;
-    public List<PuntVorm> Vormen;
-    public static List<PuntVorm> RedoStack = new List<PuntVorm>();
-        
-    public Schets()
-    {
-        bitmap = new Bitmap(1, 1);
-    }
+    private Bitmap achtergrond;
+    
+    public Bitmap Achtergrond {set => achtergrond = value;}
     public Graphics BitmapGraphics
     {
         get { return Graphics.FromImage(bitmap); }
     }
+
+    private readonly List<Element> elements;
+    private readonly List<Element> redoElement;
+    private readonly List<Element> undoElement;
+    
+    public List<Element> Elements { get => elements;}
+    
+    public Schets(Image img = null)
+    {
+        bitmap = new Bitmap(1, 1);
+        achtergrond = img as Bitmap;
+        
+        elements = new List<Element>();
+        redoElement = new List<Element>();
+        undoElement = new List<Element>();
+    }
+
+    public void VoegToe(Element el)
+    {
+        elements.Add(el);
+        Update();
+    }
+    
+    public void HaalWeg(Element el)
+    {
+        elements.Remove(el);
+        Update();
+    }
+
+    public void RedoAdd(Element el)
+    {
+        redoElement.Add(el);
+        Update();
+    }
+
+    public void UndoAdd(Element el)
+    {
+        undoElement.Add(el);
+        Update();
+    }
+    
+    public void Redoer()
+    {
+        if (redoElement.Count > 0)
+        {
+            Element el = redoElement[^1];
+            
+            elements.Add(el);
+            
+            undoElement.Add(el);
+            
+            redoElement.RemoveAt(redoElement.Count - 1);
+
+            Update();
+        }
+    }
+
+    public void Undoer()
+    {
+        if (undoElement.Count > 0)
+        {
+            Element el = undoElement[^1];
+            
+            redoElement.Add(el);
+            
+            elements.Remove(el);
+            
+            undoElement.RemoveAt(undoElement.Count - 1);
+
+            Update();
+        }
+    }
+    
     public void VeranderAfmeting(Size sz)
     {
         if (sz.Width > bitmap.Size.Width || sz.Height > bitmap.Size.Height)
@@ -30,27 +103,64 @@ public class Schets
             bitmap = nieuw;
         }
     }
+    
+    public void Save(string filename, ImageFormat format) => bitmap.Save(filename, format);
+
+    public void Save(string filename, string schetsnaam)
+    {
+        FileStream fs = new FileStream(filename, FileMode.OpenOrCreate);
+        BinaryWriter writer = new(fs);
+
+        writer.Write(Encoding.ASCII.GetBytes("Schets+"));
+        writer.Write(schetsnaam);
+        writer.Write(achtergrond != null);
+        if (achtergrond != null)
+        {
+            byte[] image = (byte[])new ImageConverter().ConvertTo(achtergrond, typeof(byte[]));
+            writer.Write(image.Length);
+            writer.Write(image);
+
+        }
+        
+        writer.Write(elements.Count);
+        foreach (Element el in elements)
+        {
+            writer.Write(el.ToBytes());
+        }
+        writer.Close();
+    }
+
     public void Teken(Graphics gr)
     {
         gr.DrawImage(bitmap, 0, 0);
     }
     public void Schoon()
     {
-        Graphics gr = Graphics.FromImage(bitmap);
-        gr.FillRectangle(Brushes.White, 0, 0, bitmap.Width, bitmap.Height);
+        elements.Clear();
+        undoElement.Clear();
+        Update();
     }
     public void Roteer()
     {
-        bitmap.RotateFlip(RotateFlipType.Rotate90FlipNone);
+        foreach (Element el in elements)
+        {
+            el.Draai(90, new Point(bitmap.Size.Width / 2, bitmap.Size.Height / 2));
+        }
+        Update();
     }
 
-    public void NaarSchetsBestand(string bestandsnaam)
+    public void Update()
     {
-        StreamWriter bestand = new StreamWriter(bestandsnaam);
-        foreach (PuntVorm vorm in Vormen)
+        BitmapGraphics.FillRectangle(Brushes.White, 0, 0, bitmap.Width, bitmap.Height);
+        if (achtergrond != null)
         {
-            bestand.WriteLine(vorm.ToString());
+            BitmapGraphics.DrawImage(achtergrond, 0, 0, bitmap.Width, bitmap.Height);
         }
-        bestand.Close();
+
+        foreach (Element el in elements)
+        {
+            el.Teken(BitmapGraphics);
+        }
     }
+    
 }
