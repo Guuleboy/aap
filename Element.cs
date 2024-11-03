@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using static SchetsEditorC.Element;
 
 namespace SchetsEditorC;
 
-public class Element
+public static class Element
 {
     public enum ElementTypes : byte
     {
@@ -38,52 +39,32 @@ public class Element
 	    ElementTypes.Plaatje => "plaatje",
 	    ElementTypes.Gum => "gum"
     };
-    
-    public virtual ElementTypes ElementType
-    {
-	    get { throw new System.NotImplementedException(); }
-    }
-
-    public virtual void Teken(Graphics s)
-    {
-	    throw new NotImplementedException();
-    }
-
-    public virtual bool Contains(Point point)
-    {
-	    throw new NotImplementedException();
-    }
-
-    public virtual void Draai(double degrees, Point origin)
-    {
-	    throw new NotImplementedException();
-    }
-
-    internal virtual void FromBytes(BinaryReader reader)
-    {
-	    throw new NotImplementedException();
-    }
-
-    public virtual byte[] ToBytes()
-    {
-	    throw new NotImplementedException();
-    }
 }
 
 public abstract class Elementen
 {
-    public abstract Element.ElementTypes ElementType { get; }
+    public abstract ElementTypes ElementType { get; }
     
-    public override string ToString() => Element.TypeNaam(ElementType);
+    public override string ToString() => TypeNaam(ElementType);
     
-    public static Element Deserialize(BinaryReader reader)
+    public abstract void Teken(Graphics g);
+
+    public abstract bool Contains(Point point);
+
+    public abstract void Draai(double degrees, Point origin);
+
+    public abstract byte[] ToBytes();
+    
+    internal abstract void FromBytes(BinaryReader reader);
+    
+    public static Elementen Deserialize(BinaryReader reader)
     {
-        Element el = EmptyFromType((Element.ElementTypes)reader.ReadByte());
+        Elementen el = EmptyFromType((ElementTypes)reader.ReadByte());
         el.FromBytes(reader);
         return el;
     }
     
-    private static Element EmptyFromType(Element.ElementTypes type) => type switch
+    private static Elementen EmptyFromType(Element.ElementTypes type) => type switch
     {
         Element.ElementTypes.Vierkant => new VierkantElement(),
         Element.ElementTypes.Cirkel => new CirkelElement(),
@@ -92,7 +73,7 @@ public abstract class Elementen
     };
 }
 
-public class LijnElement : Element
+public class LijnElement : Elementen
 {
 	public override ElementTypes ElementType => ElementTypes.Lijn;
 
@@ -119,7 +100,7 @@ public class LijnElement : Element
 		double s = (a + b + c) / 2;
 		return 2 * Math.Sqrt(s * (s - a) * (s - b) * (s - c)) / a < 5;
 	}
-/*
+
 	public override byte[] ToBytes()
 	{
 		MemoryStream stream = new();
@@ -142,7 +123,7 @@ public class LijnElement : Element
 		Pt1 = new Point(reader.ReadInt32(), reader.ReadInt32());
 		Pen = new Pen(Color.FromArgb(reader.ReadInt32()), reader.ReadSingle());
 	}
-*/
+
 	public override void Draai(double degrees, Point origin)
 	{
 		double angleRad = degrees * (Math.PI / 180);
@@ -163,7 +144,7 @@ public class LijnElement : Element
 	}
 }
 
-public abstract class BasisVierkantElement : Element
+public abstract class BasisVierkantElement : Elementen
 {
 	public Rectangle Bounds;
 	public Pen Pen;
@@ -179,7 +160,7 @@ public abstract class BasisVierkantElement : Element
 	}
 
 	public override bool Contains(Point point) => Bounds.Contains(point);
-/*
+
 	public override byte[] ToBytes()
 	{
 		MemoryStream stream = new();
@@ -192,11 +173,11 @@ public abstract class BasisVierkantElement : Element
 		writer.Write(Bounds.Height);
 		writer.Write(Pen.Color.ToArgb());
 		writer.Write(Pen.Width);
-		writer.Write(Fill.Color.ToArgb());
+		writer.Write(Vulling.Color.ToArgb());
 
 		return stream.ToArray();
 	}
-*/
+
 	public override void Draai(double degrees, Point origin)
 	{
 		double angleRad = degrees * (Math.PI / 180);
@@ -209,14 +190,14 @@ public abstract class BasisVierkantElement : Element
 		Bounds.X = X;
 		Bounds.Y = Y;
 	}
-/*
+
 	internal override void FromBytes(BinaryReader reader)
 	{
 		Bounds = new Rectangle(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
 		Pen = new Pen(Color.FromArgb(reader.ReadInt32()), reader.ReadSingle());
-		Fill = new SolidBrush(Color.FromArgb(reader.ReadInt32()));
+		Vulling = new SolidBrush(Color.FromArgb(reader.ReadInt32()));
 	}
-*/
+
 }
 
 public class VierkantElement : BasisVierkantElement

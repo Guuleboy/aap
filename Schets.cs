@@ -18,41 +18,41 @@ public class Schets
         get { return Graphics.FromImage(bitmap); }
     }
 
-    private readonly List<Element> elements;
-    private readonly List<Element> redoElement;
-    private readonly List<Element> undoElement;
+    private readonly List<Elementen> elements;
+    private readonly List<Elementen> redoElement;
+    private readonly List<Elementen> undoElement;
     
-    public List<Element> Elements { get => elements;}
+    public List<Elementen> Elements { get => elements;}
     
     public Schets(Image img = null)
     {
         bitmap = new Bitmap(1, 1);
         achtergrond = img as Bitmap;
         
-        elements = new List<Element>();
-        redoElement = new List<Element>();
-        undoElement = new List<Element>();
+        elements = new List<Elementen>();
+        redoElement = new List<Elementen>();
+        undoElement = new List<Elementen>();
     }
 
-    public void VoegToe(Element el)
+    public void VoegToe(Elementen el)
     {
         elements.Add(el);
         Update();
     }
     
-    public void HaalWeg(Element el)
+    public void HaalWeg(Elementen el)
     {
         elements.Remove(el);
         Update();
     }
 
-    public void RedoAdd(Element el)
+    public void RedoAdd(Elementen el)
     {
         redoElement.Add(el);
         Update();
     }
 
-    public void UndoAdd(Element el)
+    public void UndoAdd(Elementen el)
     {
         undoElement.Add(el);
         Update();
@@ -62,7 +62,7 @@ public class Schets
     {
         if (redoElement.Count > 0)
         {
-            Element el = redoElement[^1];
+            Elementen el = redoElement[^1];
             
             elements.Add(el);
             
@@ -78,7 +78,7 @@ public class Schets
     {
         if (undoElement.Count > 0)
         {
-            Element el = undoElement[^1];
+            Elementen el = undoElement[^1];
             
             redoElement.Add(el);
             
@@ -123,7 +123,7 @@ public class Schets
         }
         
         writer.Write(elements.Count);
-        foreach (Element el in elements)
+        foreach (Elementen el in elements)
         {
             writer.Write(el.ToBytes());
         }
@@ -136,13 +136,17 @@ public class Schets
     }
     public void Schoon()
     {
+        redoElement.Clear();
+        foreach (Elementen el in elements)
+        {
+            redoElement.Add(el);
+        }
         elements.Clear();
-        undoElement.Clear();
         Update();
     }
     public void Roteer()
     {
-        foreach (Element el in elements)
+        foreach (Elementen el in elements)
         {
             el.Draai(90, new Point(bitmap.Size.Width / 2, bitmap.Size.Height / 2));
         }
@@ -157,7 +161,7 @@ public class Schets
             BitmapGraphics.DrawImage(achtergrond, 0, 0, bitmap.Width, bitmap.Height);
         }
 
-        foreach (Element el in elements)
+        foreach (Elementen el in elements)
         {
             el.Teken(BitmapGraphics);
         }

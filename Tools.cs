@@ -159,7 +159,7 @@ public class CirkelTool : TweepuntTool
 
 public class LijnTool : TweepuntTool
 {
-    private LijnElement _element;
+    protected LijnElement _element;
     
     public override Element.ElementTypes ElementType => Element.ElementTypes.Lijn;
 
@@ -199,7 +199,7 @@ public class GumTool : SchetsTool
     
     public override void MuisVast(SchetsControl s, Point p)
     {
-        Element el = s.Sketch.Elements.LastOrDefault(e => e.Contains(p));
+        Elementen el = s.Sketch.Elements.LastOrDefault(e => e.Contains(p));
         if (el == null) return;
         
         s.Sketch.RedoAdd(el);
