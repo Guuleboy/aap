@@ -49,7 +49,7 @@ public abstract class Elementen
     
     public abstract void Teken(Graphics g);
 
-    public abstract bool Contains(Point point);
+    public abstract bool Bevat(Point point);
 
     public abstract void Draai(double degrees, Point origin);
 
@@ -64,12 +64,12 @@ public abstract class Elementen
         return el;
     }
     
-    private static Elementen EmptyFromType(Element.ElementTypes type) => type switch
+    private static Elementen EmptyFromType(ElementTypes type) => type switch
     {
-        Element.ElementTypes.Vierkant => new VierkantElement(),
-        Element.ElementTypes.Cirkel => new CirkelElement(),
-        Element.ElementTypes.Lijn => new LijnElement(),
-        Element.ElementTypes.Gum => null
+        ElementTypes.Vierkant => new VierkantElement(),
+        ElementTypes.Cirkel => new CirkelElement(),
+        ElementTypes.Lijn => new LijnElement(),
+        ElementTypes.Gum => null
     };
 }
 
@@ -91,7 +91,7 @@ public class LijnElement : Elementen
 
 	public override void Teken(Graphics s) => s.DrawLine(Pen, Pt1, Pt2);
 
-	public override bool Contains(Point point)
+	public override bool Bevat(Point point)
 	{
 		Math.Sqrt(Math.Pow(Pt1.X - Pt2.X, 2) + Math.Pow(Pt1.Y - Pt2.Y, 2));
 		double a = Math.Sqrt(Math.Pow(Pt1.X - Pt2.X, 2) + Math.Pow(Pt1.Y - Pt2.Y, 2));
@@ -159,7 +159,7 @@ public abstract class BasisVierkantElement : Elementen
 		Vulling = vulling;
 	}
 
-	public override bool Contains(Point point) => Bounds.Contains(point);
+	public override bool Bevat(Point point) => Bounds.Contains(point);
 
 	public override byte[] ToBytes()
 	{
@@ -230,7 +230,7 @@ public class CirkelElement : BasisVierkantElement
 		s.DrawEllipse(Pen, Bounds);
 	}
 
-	public override bool Contains(Point point)
+	public override bool Bevat(Point point)
 	{
 		Point midden = new(Bounds.X + Bounds.Width / 2, Bounds.Y + Bounds.Height / 2);
 		double xRadius = Bounds.Width / 2;

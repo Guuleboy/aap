@@ -166,5 +166,4 @@ public class Schets
             el.Teken(BitmapGraphics);
         }
     }
-    
 }

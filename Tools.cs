@@ -56,13 +56,17 @@ public class TekstTool : StartpuntTool
 
 public abstract class TweepuntTool : StartpuntTool
 {
+    
     public static Rectangle Punten2Rechthoek(Point p1, Point p2)
     {   return new Rectangle( new Point(Math.Min(p1.X,p2.X), Math.Min(p1.Y,p2.Y))
                             , new Size (Math.Abs(p1.X-p2.X), Math.Abs(p1.Y-p2.Y))
                             );
     }
+    
+
     public static Pen MaakPen(Brush b, int dikte)
-    {   Pen pen = new Pen(b, dikte);
+    {
+        Pen pen = new Pen(b, dikte);
         pen.StartCap = LineCap.Round;
         pen.EndCap = LineCap.Round;
         return pen;
@@ -84,14 +88,14 @@ public abstract class TweepuntTool : StartpuntTool
     }
     public override void MuisDrag(SchetsControl s, Point p)
     {   s.Refresh();
-        s.Sketch.Update();
+        s.Schets.Update();
         this.Bezig(s.Graphics, this.startpunt, p);
     }
     
     public override void MuisLos(SchetsControl s, Point p)
     {   base.MuisLos(s, p);
         this.Compleet(s.Graphics, this.startpunt, p);
-        s.Sketch.Update();
+        s.Schets.Update();
         s.Invalidate();
     }
     public override void Letter(SchetsControl s, char c)
@@ -114,8 +118,8 @@ public class RechthoekTool : TweepuntTool
     {
         base.MuisVast(s, p);
         _element = new(Rectangle.Empty, MaakPen(kwast, 3), gevuld);
-        s.Sketch.VoegToe(_element);
-        s.Sketch.UndoAdd(_element);
+        s.Schets.VoegToe(_element);
+        s.Schets.UndoAdd(_element);
     }
     
     public override void Bezig(Graphics g, Point p1, Point p2)
@@ -138,10 +142,11 @@ public class CirkelTool : TweepuntTool
 
     public override void MuisVast(SchetsControl s, Point p)
     {
+        SchetsWin q = null;
         base.MuisVast(s, p);
         _element = new(Rectangle.Empty, MaakPen(kwast, 3), gevuld);
-        s.Sketch.VoegToe(_element);
-        s.Sketch.UndoAdd(_element);
+        s.Schets.VoegToe(_element);
+        s.Schets.UndoAdd(_element);
     }
     
     public override void Bezig(Graphics g, Point p1, Point p2)
@@ -167,8 +172,8 @@ public class LijnTool : TweepuntTool
     {
         base.MuisVast(s, p);
         _element = new(p,p,MaakPen(kwast, 3));
-        s.Sketch.VoegToe(_element);
-        s.Sketch.UndoAdd(_element);
+        s.Schets.VoegToe(_element);
+        s.Schets.UndoAdd(_element);
     }
     
     public override void Bezig(Graphics g, Point p1, Point p2)
@@ -199,11 +204,11 @@ public class GumTool : SchetsTool
     
     public override void MuisVast(SchetsControl s, Point p)
     {
-        Elementen el = s.Sketch.Elements.LastOrDefault(e => e.Contains(p));
+        Elementen el = s.Schets.Elements.LastOrDefault(e => e.Bevat(p));
         if (el == null) return;
         
-        s.Sketch.RedoAdd(el);
-        s.Sketch.HaalWeg(el);
+        s.Schets.RedoAdd(el);
+        s.Schets.HaalWeg(el);
         s.Invalidate();
     }
 

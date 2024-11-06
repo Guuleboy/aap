@@ -12,7 +12,7 @@ public class SchetsControl : UserControl
     public Color PenKleur
     { get { return penkleur; }
     }
-
+    
     public Color VulKleur
     {
         get { return vulkleur; }
@@ -21,20 +21,20 @@ public class SchetsControl : UserControl
     public Graphics Graphics { 
         get 
         {
-            Graphics g = Sketch.BitmapGraphics;
+            Graphics g = Schets.BitmapGraphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
             return g;
         }
     }
     
-    public Schets Sketch
+    public Schets Schets
     {
         get;
     }
     
     public SchetsControl(Image img = null)
     {   this.BorderStyle = BorderStyle.FixedSingle;
-        this.Sketch = new Schets(img);
+        this.Schets = new Schets(img);
         this.Paint += this.teken;
         this.Resize += this.veranderAfmeting;
         this.veranderAfmeting(null, null);
@@ -44,61 +44,57 @@ public class SchetsControl : UserControl
     }
     private void teken(object o, PaintEventArgs pea)
     {   
-        Sketch.Teken(pea.Graphics);
+        Schets.Teken(pea.Graphics);
     }
     
     private void veranderAfmeting(object o, EventArgs ea)
     {   
-        Sketch.VeranderAfmeting(this.ClientSize);
+        Schets.VeranderAfmeting(this.ClientSize);
         this.Invalidate();
     }
     
     public void Redo(object o, EventArgs ea)
     {
-        Sketch.Redoer();
-        Sketch.Update();
+        Schets.Redoer();
+        Schets.Update();
         this.Invalidate();
     }
 
     public void Undo(object o, EventArgs ea)
     {
-        Sketch.Undoer();
-        Sketch.Update();
+        Schets.Undoer();
+        Schets.Update();
         this.Invalidate();
     }
     
     public void Schoon(object o, EventArgs ea)
     {   
-        Sketch.Schoon();
+        Schets.Schoon();
         this.Invalidate();
     }
     public void Roteer(object o, EventArgs ea)
     {   
-        Sketch.VeranderAfmeting(new Size(this.ClientSize.Height, this.ClientSize.Width));
-        Sketch.Roteer();
+        Schets.VeranderAfmeting(new Size(this.ClientSize.Height, this.ClientSize.Width));
+        Schets.Roteer();
         this.Invalidate();
     }
-    public void VeranderKleur(object obj, EventArgs ea)
-    {   
-        string kleurNaam = ((ComboBox)obj).Text;
-        penkleur = Color.FromName(kleurNaam);
-    }
-    public void VeranderKleurViaMenu(object obj, EventArgs ea)
-    {   
-        string kleurNaam = ((ToolStripMenuItem)obj).Text;
-        penkleur = Color.FromName(kleurNaam);
-    }
 
-    public void VeranderVulkleur(object obj, EventArgs ea)
+    public void VeranderKleur(object obj, EventArgs ea) => penkleur = Custom(obj, ea);
+
+    public void VeranderVulkleur(object obj, EventArgs ea) => vulkleur = Custom(obj, ea);
+
+    public static Color Custom(object obj, EventArgs ea)
     {
-        string vulkleurNaam = ((ComboBox)obj).Text;
-        vulkleur = Color.FromName(vulkleurNaam);
-    }
-    
-    public void VeranderVulKleurViaMenu(object obj, EventArgs ea)
-    {
-        string vulkleurNaam = ((ToolStripMenuItem)obj).Text;
-        vulkleur = Color.FromName(vulkleurNaam);
+        string kleurNaam = "Custom";
+        if (obj is ComboBox ccb) kleurNaam = ccb.Text;
+        if (obj is ToolStripMenuItem mm) kleurNaam = mm.Text;
+        
+        if (kleurNaam != "Custom") 
+            return Color.FromName(kleurNaam);
+        
+        if (new ColorDialog() is var dia && dia.ShowDialog() == DialogResult.OK) 
+            return dia.Color;
+        return Color.FromName(kleurNaam);
     }
 }
 

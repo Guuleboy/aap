@@ -10,50 +10,33 @@ namespace SchetsEditorC;
 public class SchetsEditor : Form
 {
     private MenuStrip menuStrip;
-    private ToolStripDropDownItem _sketchMenu;
+    private ToolStripDropDownItem _schetsMenu;
 
     private int schetsIndex;
-    private List<SchetsWin> _sketchWindows;
+    private List<SchetsWin> _schetsWindows;
     
-    public List<SchetsWin> Sketches {get => _sketchWindows;}
-    
-    private SchetsWin _sketch;
-    public SchetsWin Sketch {get => _sketch; set => _sketch = value; }
+    private SchetsWin _schets;
 
     public SchetsEditor()
     {   
-        _sketchWindows = new List<SchetsWin>();
+        _schetsWindows = new List<SchetsWin>();
         
         this.ClientSize = new Size(800, 600);
         menuStrip = new MenuStrip();
         this.Controls.Add(menuStrip);
         this.maakFileMenu();
         this.maakHelpMenu();
-        this.MaakSchets();
         this.Text = "Schets editor";
         this.IsMdiContainer = true;
         this.MainMenuStrip = menuStrip;
     }
-
-    public void VerwijderSchets(SchetsWin window)
-    {
-        _sketchMenu.DropDownItems.Remove(window.It);
-        _sketchWindows.Remove(window);
-    }
-
-    private void MaakSchets()
-    {
-        _sketchMenu = new ToolStripMenuItem("Schetsen");
-        menuStrip.Items.Add(_sketchMenu);
-    }
-    
     
     private void maakFileMenu()
     {   
         ToolStripDropDownItem menu = new ToolStripMenuItem("File");
         menu.DropDownItems.Add("Nieuw", null, this.NieuweSchetsManager);
         menu.DropDownItems.Add("Open", null, Open);
-        menu.DropDownItems.Add("Exit", null, this.afsluiten);
+        menu.DropDownItems.Add("Programma Sluiten", null, this.afsluiten);
         menuStrip.Items.Add(menu);
     }
     private void maakHelpMenu()
@@ -73,7 +56,7 @@ public class SchetsEditor : Form
     
     public void HideAll()
     {
-        foreach (SchetsWin window in _sketchWindows)
+        foreach (SchetsWin window in _schetsWindows)
         {
             window.Hide();
         }
@@ -97,7 +80,7 @@ public class SchetsEditor : Form
         }
         BinaryReader br = new(fs);
         byte[] magic = br.ReadBytes(7);
-        if (Encoding.ASCII.GetString(magic) != "Sketch+")
+        if (Encoding.ASCII.GetString(magic) != "Schets+")
         {
             ErrorDialog("Error", "Bestand is geen schets bestand");
             return;
@@ -107,35 +90,28 @@ public class SchetsEditor : Form
         HideAll();
         SchetsWin s = new(this, br)
         {
-            Name = name,
+            Naam = name,
             MdiParent = this
         };
         s.Show();
         s.Location = new Point(0, 0);
-        _sketchWindows.Add(s);
-        _sketch = s;
-        s.It = _sketchMenu.DropDownItems.Add(s.Name, null, s.SelectSketch);
-        schetsIndex++;
+        _schetsWindows.Add(s);
+        _schets = s;
     }
     
     public static void ErrorDialog(string title, string caption) => MessageBox.Show (caption, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
     
     private void nieuw(Image img)
     {
-        string name = PromptDialog("Nieuwe Schets", "Schets naam: ");
-        
         HideAll();
         SchetsWin s = new(this, img)
         {
-            Name = name == "" ? $"Schets {schetsIndex++}" : name, 
             MdiParent = this
         };
         s.Show();
         s.Location = new Point(0, 0);
-        _sketchWindows.Add(s);
-        _sketch = s;
-        s.It = _sketchMenu.DropDownItems.Add(s.Name, null, s.SelectSketch);
-        schetsIndex++;
+        _schetsWindows.Add(s);
+        _schets = s;
     }
 
     private void Open(object sender, EventArgs e)
@@ -152,33 +128,12 @@ public class SchetsEditor : Form
         }
     }
     
-    public static string PromptDialog(string text, string caption)
-    {
-        Form prompt = new()
-        {
-            Width = 300,
-            Height = 130,
-            FormBorderStyle = FormBorderStyle.FixedDialog,
-            Text = caption,
-            StartPosition = FormStartPosition.CenterParent
-        };
-        
-        Label textLabel = new () { Left = 50, Top = 10, Text = text };
-        TextBox textBox = new () { Left = 50, Top = 30, Text = text };
-        Button confirmation = new () { Text = "Ok", Left = 110, Width = 80, Top = 60,  DialogResult = DialogResult.OK };
-        
-        confirmation.Click += (sender, e) => { prompt.Close(); };
-        prompt.Controls.Add(textBox);
-        prompt.Controls.Add(textLabel);
-        prompt.Controls.Add(confirmation);
-        prompt.AcceptButton = confirmation;
-
-        return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : "";
-    }
-    
-    
     private void afsluiten(object sender, EventArgs e)
-    {   
-        this.Close();
+    {
+        DialogResult result = MessageBox.Show("Weet je zeker dat je het programma wilt sluiten?", "Confirm Close", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        if (result == DialogResult.Yes)
+        {
+            this.Close();
+        }
     }
 }

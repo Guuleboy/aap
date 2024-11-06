@@ -1,3 +1,66 @@
 ﻿23-10-2024:
 Cirkels zijn toegevoegd op basis van het bestaande vierkant systeem. Wij hebben ervoor gekozen om in paint voor nu hele
 simpele tekeningen te maken voor de buttons. Hierna zullen nog betere tekeningen volgen.
+
+25-10-2024:
+Uiteindelijk zijn de icoontjes van de cirkel en vierkant gevuld aangepast naar een netter icoontje wat meer in lijn is 
+met de rest van de UI. Verder is er begonnen aan het schrijven van de ELement file om de gum tool werekende te krijgen
+
+26-10-2024:
+Door een makkelijke manier van het verkrijgen van te typenamen en icoonnamen voor een soepelere werking in het programma
+is deze code herschreven en is er een ENUM groep toegevoegd voor de soorten elementen die gemaakt gaan worden. De gum is 
+gekozen om Null te houden omdat hier geen element voor wordt aangemaakt maar wel een icoontje.
+
+26-10-2024 2:
+Als eerste element het vierkant element gemaakt. Deze is net als in de originele tools opgeplitst in twee delen. De
+basis tool en het echte element. Dit is gedaan omdat de cirkel hier ook van erft. Er is voor gekozen om Bounds te gebruiken
+voor de gum. Als er in het vierkant geklikt wordt zal het vierkant verdwijnen. Verder is er wiskunde geschreven voor de 
+draai functie dat deze correct zal werken. Hierna is het vierkant element zelf geschreven.
+
+27-10-2024:
+Het cirkel element is nu ook geschreven. Dit element erft van het basisvierkantelement zodat er geen replicatie van code is.
+De bevat functie is wel herschreven vanwege dat het alleen binnen de ellipse geld en niet het omvattende vierkant waarbinnen
+de ellipse getekend wordt.
+
+27-10-2024 2:
+Als laatste is de lijn functie geschreven. Hierbij is de bijbehordende wiskunde geschreven volgens de stelling van pythagoras
+Hierna is de tools.cs file aangepast voor de elementen. De IconName wordt opgehaald uit de IcoonNaam in de element functie
+De grote verandering in dit .cs document is dat de element naam gekozen wordt vanuit de elementtypes. In de bezig methode
+worden de nieuwe bounds gedefinieerd. Elk element dat wordt getekend wordt toegevoegd aan de lijst van Elementen waaruit
+het elemenent uiteindelijk verwijderd kan worden in de gum functie. Hiervoor is in de schets file een nieuwe functie HaalWeg
+geschreven waarin het aangeklikte element correct verwijderd wordt.
+
+30-10-2024:
+in de Schets file is een nieuwe bitmap gemaakt voor de achtergrond. Deze is belangrijk voor het oplsaan. Hierom is de public
+Schets aangepast om een parameter the hebben van img. De voegtoe en haal weg elementen zijn nu correct geprogrammeerd voor
+de gum methode. Ook is de update methode hiervoor geschreven. Deze tekent ook een nieuwe achtergrond en tekent altijd alle
+elementen uit de lijst van elementen.
+
+2-11-2024:
+De undo, redo, en vulling zijn toegevoegd. Voor de bonus punten zijn de undo en redo toegevoegd. Wij hebben hiervoor 
+gekozen omdat wij dit als een rederlijk essentieel onderdeel van Schets zien. Dit is gedaan door twee lijsten bij te houden
+met elementen. Deze lijsten zijn bijna hetzelfde als de elementen lijst, het enige verschil is dat deze lijsten andere 
+dingen bijhouden. De redo lijst houdt de elementen bij die weggegumd worden en de undo lijst houd de nieuwe elementen bij
+Bij de clear/schoon functie is deze zo aangepast dat de redo lijst geleegd word en de elementen uit de elements lijst
+hierin gedaan worden. Dit is gedaan zodat als de bitmap leeg gemaakt word door de elements lijst leeg te maken er nog steeds
+een redo gedaan kan worden.
+
+Er is door ons ook een nieuwe functie toegevoegd. Wij vonden het erg jammer dat de vulkleur en lijnkleur hetzelfde waren
+Daarom hebben wij een nieuwe functie geschreven die ervoor zorgt dat deze anders kunnen zijn. Hierdoor zijn de volcirkel
+en volvierkant compleet overbodig en verwijderd. In tools is er een nieuwe solidbrush aangemaakt die zich vergelijkbaar
+gedraagt als kwast. Alleen krijgt deze een andere kleur. De kleur is exact hetzelfde gedaan als de al bestaande kleuren.
+Het eerste element in de kleuren lijst is aangepast naar transparant voor het normale vierkant. Hier is wel rekening mee 
+gehouden door als de lijst voor de penkleuren word gemaakt het eerste element overgeslagen wordt zodat de pen nooit
+transparant kan zijn.
+
+Verder wordt er bij elk element gekeken of er een vulkleur bekend is. Zo ja doe dan fill rectangle anders draw rectangle
+
+5-11-2024:
+Er is gewerkt aan het opslaan en exporteren van de files. Hierbij is gekozen voor een byte format voor het opslaan
+Dit is gedaan op aanrading omdat dit een snellere en preciezere manier is om de files op te slaan. Hierbij hebben wij elk
+element onderdeel opgeslagen zoals het begin en eindpunt van het object en de kleur in verschillende bytes die bij het 
+openen omgezet worden naar waardes waar het programma mee kan werken.
+
+6-11-2024:
+De laatste hand is aan het programma gelegd, een aantal comments zijn toegevoegd voor duidelijkheid en variabele hebben
+een duidelijkere benaming gekregen. 

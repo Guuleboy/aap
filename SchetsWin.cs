@@ -12,7 +12,7 @@ namespace SchetsEditorC;
 public class SchetsWin : Form
 {
     internal ToolStripItem It;
-    internal new string Name;
+    internal string Naam;
     
     private readonly SchetsEditor parent;
     public MenuStrip menuStrip; 
@@ -29,18 +29,18 @@ public class SchetsWin : Form
         {
             int imageSize = br.ReadInt32();
             var img = Image.FromStream(new MemoryStream(br.ReadBytes(imageSize)));
-            schetscontrol.Sketch.Achtergrond = img as Bitmap;
+            schetscontrol.Schets.Achtergrond = img as Bitmap;
         }
         int elementCount = br.ReadInt32();
         for (int i = 0; i < elementCount; i++)
         {
-            schetscontrol.Sketch.VoegToe(Elementen.Deserialize(br));
+            schetscontrol.Schets.VoegToe(Elementen.Deserialize(br));
         }
     }
     
     public SchetsWin(SchetsEditor parent, Image img = null)
     {
-        FormBorderStyle = FormBorderStyle.None;
+        FormBorderStyle = FormBorderStyle.FixedSingle;
         
         SchetsTool[] deTools = { new PenTool()         
                                 , new LijnTool()
@@ -49,9 +49,9 @@ public class SchetsWin : Form
                                 , new TekstTool()
                                 , new GumTool()
                                 };
-        String[] deKleuren = { "Transparant", "Black", "Red", "Green", "Blue", "Yellow", "Magenta", "Cyan" };
+        String[] deKleuren = { "Transparant", "Black", "Red", "Green", "Blue", "Yellow", "Magenta", "Cyan", "White", "Custom" };
 
-        this.ClientSize = new Size(700, 500);
+        this.ClientSize = new Size(775, 525);
         huidigeTool = deTools[0];
 
         schetscontrol = new SchetsControl(img)
@@ -104,35 +104,25 @@ public class SchetsWin : Form
     {
         this.huidigeTool = (SchetsTool)((RadioButton)obj).Tag;
     }
-
+    
     private void afsluiten(object obj, EventArgs ea)
     {
-        Hide();
-        parent.VerwijderSchets(this);
-        parent.Sketch = parent.Sketches.LastOrDefault();
-        if (parent.Sketch != null)
+        DialogResult result = MessageBox.Show("Weet je zeker dat je het programma wilt sluiten", "Confirm Close", 
+            MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        if (result == DialogResult.Yes)
         {
-            parent.Sketch.Show();
-            parent.Sketch.Location = new Point(0, 0);
+            Hide();
+            this.Close();
         }
-        this.Close();
-    }
-
-    public void SelectSketch(object o, EventArgs ea)
-    {
-        parent.HideAll();
-        Show();
-        Location = new Point(0, 0);
-        parent.Sketch = this;
     }
     
     private void maakFileMenu()
-    {   
+    {
         ToolStripMenuItem menu = new ToolStripMenuItem("File");
         menu.MergeAction = MergeAction.MatchOnly;
-        menu.DropDownItems.Add("Sluiten", null, this.afsluiten);
-        menu.DropDownItems.Add("Open", null, this.Oplsaan);
-        menu.DropDownItems.Add("Opslaan", null, this.OpslaanAls);
+        menu.DropDownItems.Add("Schets Sluiten", null, this.afsluiten);
+        menu.DropDownItems.Add("Opslaan", null, this.Oplsaan);
+        menu.DropDownItems.Add("Opslaan als", null, this.OpslaanAls);
         menuStrip.Items.Add(menu);
     }
 
@@ -147,7 +137,7 @@ public class SchetsWin : Form
         string ext = Path.GetExtension(path);
         if (ext == ".schets")
         {
-            schetscontrol.Sketch.Save(path, Name);
+            schetscontrol.Schets.Save(path, Naam);
             return;
         }
 
@@ -157,7 +147,7 @@ public class SchetsWin : Form
             ".bmp" => ImageFormat.Bmp,
             _ => ImageFormat.Png
         };
-        schetscontrol.Sketch.Save(path, format);
+        schetscontrol.Schets.Save(path, format);
     }
 
     private void OpslaanAls(object obj, EventArgs ea)
@@ -166,7 +156,7 @@ public class SchetsWin : Form
         {
             Filter = "PNG|*.png;|Bitmap|*.bmp;|JPG|*.jpg|SCHETS|*.schets",
             Title = "Bestand opslaan als ...",
-            FileName = $"{Name}.Schets"
+            FileName = $"{Naam}.Schets"
         };
 
         if (Dialog.ShowDialog() == DialogResult.OK)
@@ -198,10 +188,10 @@ public class SchetsWin : Form
         menu.DropDownItems.Add("Roteer", null, schetscontrol.Roteer );
         ToolStripMenuItem submenu = new ToolStripMenuItem("Kies kleur");
         foreach (string k in kleuren.Skip(1))
-            submenu.DropDownItems.Add(k, null, schetscontrol.VeranderKleurViaMenu);
+            submenu.DropDownItems.Add(k, null, schetscontrol.VeranderKleur);
         ToolStripMenuItem vulsubmenu = new ToolStripMenuItem("Kies vulkleur");
         foreach (string k in kleuren)
-            submenu.DropDownItems.Add(k, null, schetscontrol.VeranderVulKleurViaMenu);
+            vulsubmenu.DropDownItems.Add(k, null, schetscontrol.VeranderVulkleur);
         menu.DropDownItems.Add("Redo", null, schetscontrol.Redo);
         menu.DropDownItems.Add("Undo", null, schetscontrol.Undo);
         menu.DropDownItems.Add(submenu);
@@ -230,10 +220,10 @@ public class SchetsWin : Form
         }
     }
 
-    private void maakActieButtons(String[] kleuren)
+    public void maakActieButtons(String[] kleuren)
     {   
         paneel = new Panel(); this.Controls.Add(paneel);
-        paneel.Size = new Size(600, 24);
+        paneel.Size = new Size(700, 24);
             
         Button clear = new Button(); paneel.Controls.Add(clear);
         clear.Text = "Clear";  
@@ -284,95 +274,4 @@ public class SchetsWin : Form
         vulcbb.SelectedIndex = 0;
     }
     
-}
-public class Tekst : Form
-{
-    private TextBox invoer;
-
-    public Tekst()
-    {
-        invoer = new TextBox();
-        this.Controls.Add(invoer);
-    }
-
-    void zoeken(object sender, EventArgs e)
-    {
-        ZoekDialoog d = new ZoekDialoog();
-        if (d.ShowDialog() == DialogResult.OK)
-        {
-            string alles = invoer.Text;
-            string zk = d.Zoek.Text;
-
-            if (!string.IsNullOrEmpty(zk)) // Controleer of de zoekterm niet leeg is
-            {
-                int pos = alles.IndexOf(zk);
-                if (pos >= 0) // Controleer of de term gevonden is
-                {
-                    invoer.Select(pos, zk.Length);
-                }
-                else
-                {
-                    MessageBox.Show("Zoekterm niet gevonden.");
-                }
-            }
-        }
-    }
-
-    public void lees(string naam) //lezen van string 
-    {
-        StreamReader sr = new StreamReader(naam);
-        this.invoer.Text = sr.ReadToEnd();
-        sr.Close();
-        this.Text = naam;
-    }
-
-    void Schrijf(string naam)
-    {
-        StreamWriter sw = new StreamWriter(naam);
-        sw.Write(this.invoer.Text);
-        sw.Close();
-        this.Text = naam;
-    }
-}
-
-class ZoekDialoog : Form
-{
-
-    public TextBox Zoek;
-    private Button ok, cc;
-
-    public ZoekDialoog()
-    {
-        // positionering van de knoppen bovenaan het scherm
-        Zoek = new TextBox()
-        {
-            Dock = DockStyle.Top
-        };
-        ok = new Button()
-        {
-            Text = "OK",
-            Dock = DockStyle.Right
-        };
-
-        cc = new Button()
-        {
-            Text = "Annuleer",
-            Dock = DockStyle.Right
-        };
-        
-        ok.Click += this.positief;
-        this.CancelButton = cc;
-        this.AcceptButton = ok;
-        
-        this.Controls.Add(Zoek);
-        this.Controls.Add(ok);
-        this.Controls.Add(cc);
-        this.AcceptButton = ok;
-    }
-
-    void positief(object sender, EventArgs e)
-    {
-        this.DialogResult = DialogResult.OK;
-        this.Close();
-    }
 }
