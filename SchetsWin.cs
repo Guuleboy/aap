@@ -17,7 +17,7 @@ public class SchetsWin : Form
     private readonly SchetsEditor parent;
     public MenuStrip menuStrip; 
     public SchetsControl schetscontrol;
-    private SchetsTool huidigeTool;
+    private ISchetsTool huidigeTool;
     public Panel paneel;
     private bool vast;
     private OpenFileDialog open;
@@ -42,7 +42,7 @@ public class SchetsWin : Form
     {
         FormBorderStyle = FormBorderStyle.FixedSingle;
         
-        SchetsTool[] deTools = { new PenTool()         
+        ISchetsTool[] deTools = { new PenTool()         
                                 , new LijnTool()
                                 , new RechthoekTool()
                                 , new CirkelTool()
@@ -97,12 +97,12 @@ public class SchetsWin : Form
 
     private void klikToolMenu(object obj, EventArgs ea)
     {
-        this.huidigeTool = (SchetsTool)((ToolStripMenuItem)obj).Tag;
+        this.huidigeTool = (ISchetsTool)((ToolStripMenuItem)obj).Tag;
     }
 
     private void klikToolButton(object obj, EventArgs ea)
     {
-        this.huidigeTool = (SchetsTool)((RadioButton)obj).Tag;
+        this.huidigeTool = (ISchetsTool)((RadioButton)obj).Tag;
     }
     
     private void afsluiten(object obj, EventArgs ea)
@@ -167,10 +167,10 @@ public class SchetsWin : Form
     }
 
 
-    private void maakToolMenu(ICollection<SchetsTool> tools)
+    private void maakToolMenu(ICollection<ISchetsTool> tools)
     {   
         ToolStripMenuItem menu = new ToolStripMenuItem("Tool");
-        foreach (SchetsTool tool in tools)
+        foreach (ISchetsTool tool in tools)
         {   ToolStripItem item = new ToolStripMenuItem();
             item.Tag = tool;
             item.Text = tool.ToString();
@@ -199,10 +199,10 @@ public class SchetsWin : Form
         menuStrip.Items.Add(menu);
     }
 
-    private void maakToolButtons(ICollection<SchetsTool> tools)
+    private void maakToolButtons(ICollection<ISchetsTool> tools)
     {
         int t = 0;
-        foreach (SchetsTool tool in tools)
+        foreach (ISchetsTool tool in tools)
         {
             RadioButton b = new RadioButton();
             b.Appearance = Appearance.Button;

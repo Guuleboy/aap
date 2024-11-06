@@ -5,32 +5,40 @@ using System.Linq;
 
 namespace SchetsEditorC;
 
-public abstract class SchetsTool
+public interface ISchetsTool
 {
-    public abstract Element.ElementTypes ElementType { get; }
-    public virtual string IconName { get => Element.IcoonNaam(ElementType); }
-    public override string ToString() => Element.TypeNaam(ElementType);
+    public  Element.ElementTypes ElementType { get; }
+    string IconName { get => Element.IcoonNaam(ElementType); }
     
-    public abstract void MuisVast(SchetsControl s, Point p);
-    public abstract void MuisDrag(SchetsControl s, Point p);
-    public abstract void  MuisLos(SchetsControl s, Point p);
-    public abstract void  Letter(SchetsControl s, char c);
+    void MuisVast(SchetsControl s, Point p);
+    void MuisDrag(SchetsControl s, Point p);
+    void  MuisLos(SchetsControl s, Point p);
+    void  Letter(SchetsControl s, char c);
 }
 
-public abstract class StartpuntTool : SchetsTool
+public abstract class StartpuntTool : ISchetsTool
 {
     protected Point startpunt;
     protected Brush kwast;
     protected SolidBrush gevuld;
 
-    public override void MuisVast(SchetsControl s, Point p)
+    public abstract Element.ElementTypes ElementType { get; }
+    
+    public string IconName => Element.IcoonNaam(ElementType); 
+    
+    public override string ToString() =>Element.TypeNaam(ElementType);
+
+    public virtual void MuisVast(SchetsControl s, Point p)
     {   startpunt = p;
     }
-    public override void MuisLos(SchetsControl s, Point p)
+    public virtual void MuisLos(SchetsControl s, Point p)
     {   kwast = new SolidBrush(s.PenKleur);
         gevuld = new SolidBrush(s.VulKleur);
     }
-    
+
+    public abstract void MuisDrag(SchetsControl s, Point p);
+    public abstract void Letter(SchetsControl s, char c);
+
 }
 
 public class TekstTool : StartpuntTool
@@ -198,7 +206,7 @@ public class PenTool : LijnTool
     }
 }
     
-public class GumTool : SchetsTool
+public class GumTool : StartpuntTool
 {
     public override Element.ElementTypes ElementType => Element.ElementTypes.Gum;
     
